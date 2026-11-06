@@ -5,8 +5,8 @@ import { useDesign } from '@/lib/DesignContext';
 import { DEFAULT_CHASSIS } from './dsData';
 import './ds.css';
 
-const Speaker = () => (
-  <div className="side spk" aria-hidden="true">
+const Speaker = ({ side }) => (
+  <div className={`side side-${side} spk`} aria-hidden="true">
     <div className="ds-speaker">
       {Array.from({ length: 12 }, (_, i) => <span key={i} />)}
     </div>
@@ -70,7 +70,7 @@ export default function DsDevice({ top, bottom, embed, controls = {} }) {
         <div className="ds-device">
           {/* ── upper half ── */}
           <div className="ds-shell ds-shell-top">
-            {hasControls && <Speaker />}
+            {hasControls && <Speaker side="l" />}
             <div className="scr">
               <div className="ds-topbar">
                 <span className="ds-pixel" style={{ fontSize: 16 }}>PokéApp</span>
@@ -107,7 +107,7 @@ export default function DsDevice({ top, bottom, embed, controls = {} }) {
                 </div>
               )}
             </div>
-            {hasControls && <Speaker />}
+            {hasControls && <Speaker side="r" />}
           </div>
 
           {hasControls && (
