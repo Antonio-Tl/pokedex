@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useTheme } from '@/lib/ThemeContext';
 import { useDesign } from '@/lib/DesignContext';
@@ -18,6 +18,47 @@ const Chevron = ({ d }) => (
     <path d={d} fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
+
+// Fit the whole device into the viewport (desktop only): first shrink both
+// screens from 440px down to 380px, then scale the device as a whole.
+const SCREEN_MAX = 440;
+const SCREEN_MIN = 380;
+const FIT_PAD = 16;
+const MOBILE_MAX = 860;
+
+function useFitToViewport(enabled) {
+  const pageRef = useRef(null);
+  const screenRef = useRef(SCREEN_MAX);
+  const [fit, setFit] = useState({ active: false, scale: 1, screenH: SCREEN_MAX });
+
+  useLayoutEffect(() => {
+    const el = pageRef.current;
+    if (!enabled || !el) return undefined;
+    const update = () => {
+      if (window.innerWidth <= MOBILE_MAX) {
+        screenRef.current = SCREEN_MAX;
+        setFit((f) => (f.active ? { active: false, scale: 1, screenH: SCREEN_MAX } : f));
+        return;
+      }
+      // offsetHeight ignores transforms, so this is the unscaled height
+      const chrome = el.offsetHeight - 2 * screenRef.current;
+      const avail = window.innerHeight - 2 * FIT_PAD;
+      const screenH = Math.max(SCREEN_MIN, Math.min(SCREEN_MAX, Math.floor((avail - chrome) / 2)));
+      const scale = Math.min(1, avail / (chrome + 2 * screenH));
+      screenRef.current = screenH;
+      setFit((f) => (
+        f.active && f.screenH === screenH && Math.abs(f.scale - scale) < 0.001 ? f : { active: true, scale, screenH }
+      ));
+    };
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    window.addEventListener('resize', update);
+    return () => { ro.disconnect(); window.removeEventListener('resize', update); };
+  }, [enabled]);
+
+  return [pageRef, fit];
+}
 
 const readChassis = () => {
   try { return localStorage.getItem('ds-chassis') || DEFAULT_CHASSIS; } catch { return DEFAULT_CHASSIS; }
@@ -58,6 +99,7 @@ export default function DsDevice({ top, bottom, embed, controls = {} }) {
   const [chassis] = useState(readChassis);
   const dark = theme === 'dark';
   const hasControls = !embed;
+  const [pageRef, fit] = useFitToViewport(hasControls);
 
   const c = {
     onPrev: () => {}, onNext: () => {}, onA: () => {}, onB: () => {}, onX: () => {}, onY: () => {},
@@ -65,8 +107,12 @@ export default function DsDevice({ top, bottom, embed, controls = {} }) {
   };
 
   return (
-    <div className="ds-root" data-screen={dark ? 'dark' : 'light'} style={{ '--ds-chassis': chassis }}>
-      <div className="ds-page">
+    <div
+      className={`ds-root${fit.active ? ' is-fit' : ''}${embed ? ' is-embed-page' : ''}`}
+      data-screen={dark ? 'dark' : 'light'}
+      style={{ '--ds-chassis': chassis, '--ds-screen-h': `${fit.screenH}px` }}
+    >
+      <div className="ds-page" ref={pageRef} style={fit.scale < 1 ? { transform: `scale(${fit.scale})` } : undefined}>
         <div className="ds-device">
           {/* ── upper half ── */}
           <div className="ds-shell ds-shell-top">

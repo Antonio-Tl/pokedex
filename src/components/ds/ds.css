@@ -34,6 +34,15 @@
   color: #ffffff;
 }
 
+/* Desktop: the device always fits the viewport (see useFitToViewport). */
+.ds-root.is-fit {
+  height: 100vh; height: 100dvh; min-height: 0; padding: 16px; overflow: hidden;
+  display: flex; flex-direction: column; justify-content: center;
+}
+.ds-root.is-fit .ds-page { width: 100%; flex: 0 0 auto; transform-origin: center center; }
+/* Items page: single screen sized to the viewport */
+.ds-root.is-embed-page { padding: 16px; }
+
 /* screen tokens – "Dunkel" */
 .ds-root[data-screen='dark'] {
   --ds-screen-bg: #14161c;
@@ -150,7 +159,7 @@
 .ds-screen.is-more { gap: 12px; box-shadow: inset 0 0 0 3px var(--ds-chassis); }
 .ds-screen.is-bottom { overflow: hidden; gap: 10px; }
 .ds-screen.is-bottom.is-more { padding: 14px 16px; gap: 12px; }
-.ds-screen.is-embed { height: max(var(--ds-screen-h), calc(100vh - 220px)); padding: 0; display: block; overflow: auto; }
+.ds-screen.is-embed { height: max(320px, calc(100dvh - 210px)); padding: 0; display: block; overflow: auto; }
 
 .ds-hinge { display: flex; align-items: center; height: 30px; padding: 0 30px; }
 .ds-hinge-knuckle {
