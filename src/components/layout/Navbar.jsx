@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Sword, Package, Moon, Sun } from 'lucide-react';
+import { Sword, Package, Moon, Sun, Gamepad2 } from 'lucide-react';
+import { useTheme } from '@/lib/ThemeContext';
+import { useDesign } from '@/lib/DesignContext';
 
 const navItems = [
   { path: '/', label: 'Pokédex', icon: Sword },
@@ -9,22 +10,8 @@ const navItems = [
 
 export default function Navbar() {
   const location = useLocation();
-  const [theme, setTheme] = useState('light');
-
-  useEffect(() => {
-    const savedTheme = localStorage.getItem('theme');
-    const systemPrefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const initialTheme = savedTheme || (systemPrefersDark ? 'dark' : 'light');
-    setTheme(initialTheme);
-    document.documentElement.classList.toggle('dark', initialTheme === 'dark');
-  }, []);
-
-  const toggleTheme = () => {
-    const nextTheme = theme === 'dark' ? 'light' : 'dark';
-    setTheme(nextTheme);
-    localStorage.setItem('theme', nextTheme);
-    document.documentElement.classList.toggle('dark', nextTheme === 'dark');
-  };
+  const { theme, toggleTheme } = useTheme();
+  const { setDesign } = useDesign();
 
   return (
     <nav className="sticky top-0 z-40 w-full border-b border-border bg-card/80 backdrop-blur-md">
@@ -60,6 +47,16 @@ export default function Navbar() {
         })}
 
         <div className="ml-auto" />
+
+        <button
+          onClick={() => setDesign('ds')}
+          className="h-9 px-3 mr-2 rounded-lg border border-border bg-secondary text-foreground hover:bg-secondary/80 transition-all inline-flex items-center gap-2 text-sm font-heading font-medium"
+          aria-label="Zum Dual-Screen-Design wechseln"
+          title="Dual-Screen-Design"
+        >
+          <Gamepad2 className="w-4 h-4" />
+          <span className="hidden sm:inline">DS-Design</span>
+        </button>
 
         <button
           onClick={toggleTheme}

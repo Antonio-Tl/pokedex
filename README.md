@@ -29,6 +29,14 @@ The app includes two main sections:
 - For `all-machines`: generation-based machine lookup and filtering.
 - Item detail view with additional metadata.
 
+### Dual-Screen-Design (optional)
+
+- Second, selectable design in the look of a dual-screen handheld (`DS-Design` button in the navbar, `Klassisch` on the device to switch back; persisted in `localStorage`, or via `?design=ds` / `?design=classic`).
+- Upper screen: details of the selected Pokémon; lower screen: search, type/generation filter, grid/list.
+- Button **A** / "Eintrag & mehr" opens the Pokédex entry (sprites incl. shiny/pixel, cries, forms, per-edition flavor text) and tabs for abilities, training, breeding, types, moves and locations — all live from the PokeAPI.
+- Device buttons and keyboard: arrows = browse, A/Enter = details / next tab, B/Escape = back, X = random, Y = cycle type, START = light/dark, SELECT = grid/list.
+- Design reference: `docs/design/pokedex-ds-design.html`.
+
 ### App-wide UX
 
 - Sticky navigation between Pokédex and Items routes.
