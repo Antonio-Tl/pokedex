@@ -5,41 +5,7 @@ import { Button } from '@/components/ui/button';
 import { getArtwork, formatPokemonId, capitalize, getTypeColor } from '@/lib/pokeUtils';
 import TypeBadge from './TypeBadge';
 import StatBar from './StatBar';
-
-const ALL_TYPES = [
-  'normal', 'fire', 'water', 'electric', 'grass', 'ice', 'fighting', 'poison', 'ground',
-  'flying', 'psychic', 'bug', 'rock', 'ghost', 'dragon', 'dark', 'steel', 'fairy',
-];
-
-const TYPE_CHART = {
-  normal: { double: [], half: ['rock', 'steel'], zero: ['ghost'] },
-  fire: { double: ['grass', 'ice', 'bug', 'steel'], half: ['fire', 'water', 'rock', 'dragon'], zero: [] },
-  water: { double: ['fire', 'ground', 'rock'], half: ['water', 'grass', 'dragon'], zero: [] },
-  electric: { double: ['water', 'flying'], half: ['electric', 'grass', 'dragon'], zero: ['ground'] },
-  grass: { double: ['water', 'ground', 'rock'], half: ['fire', 'grass', 'poison', 'flying', 'bug', 'dragon', 'steel'], zero: [] },
-  ice: { double: ['grass', 'ground', 'flying', 'dragon'], half: ['fire', 'water', 'ice', 'steel'], zero: [] },
-  fighting: { double: ['normal', 'ice', 'rock', 'dark', 'steel'], half: ['poison', 'flying', 'psychic', 'bug', 'fairy'], zero: ['ghost'] },
-  poison: { double: ['grass', 'fairy'], half: ['poison', 'ground', 'rock', 'ghost'], zero: ['steel'] },
-  ground: { double: ['fire', 'electric', 'poison', 'rock', 'steel'], half: ['grass', 'bug'], zero: ['flying'] },
-  flying: { double: ['grass', 'fighting', 'bug'], half: ['electric', 'rock', 'steel'], zero: [] },
-  psychic: { double: ['fighting', 'poison'], half: ['psychic', 'steel'], zero: ['dark'] },
-  bug: { double: ['grass', 'psychic', 'dark'], half: ['fire', 'fighting', 'poison', 'flying', 'ghost', 'steel', 'fairy'], zero: [] },
-  rock: { double: ['fire', 'ice', 'flying', 'bug'], half: ['fighting', 'ground', 'steel'], zero: [] },
-  ghost: { double: ['psychic', 'ghost'], half: ['dark'], zero: ['normal'] },
-  dragon: { double: ['dragon'], half: ['steel'], zero: ['fairy'] },
-  dark: { double: ['psychic', 'ghost'], half: ['fighting', 'dark', 'fairy'], zero: [] },
-  steel: { double: ['ice', 'rock', 'fairy'], half: ['fire', 'water', 'electric', 'steel'], zero: [] },
-  fairy: { double: ['fighting', 'dragon', 'dark'], half: ['fire', 'poison', 'steel'], zero: [] },
-};
-
-const getTypeMultiplier = (attackType, defendType) => {
-  const chart = TYPE_CHART[attackType];
-  if (!chart) return 1;
-  if (chart.zero.includes(defendType)) return 0;
-  if (chart.double.includes(defendType)) return 2;
-  if (chart.half.includes(defendType)) return 0.5;
-  return 1;
-};
+import { getDefensiveMultipliers } from '@/lib/typeChart';
 
 const formatMultiplier = (value) => {
   if (value === 0) return 'x0';
@@ -163,14 +129,7 @@ export default function PokemonDetail({ pokemon, onClose, onNavigate }) {
   const typeEffectiveness = useMemo(() => {
     const defendingTypes = pokemon.types?.map((t) => t.type.name) || [];
 
-    const entries = ALL_TYPES.map((attackType) => {
-      const multiplier = defendingTypes.reduce(
-        (acc, defendType) => acc * getTypeMultiplier(attackType, defendType),
-        1
-      );
-
-      return { type: attackType, multiplier };
-    });
+    const entries = getDefensiveMultipliers(defendingTypes);
 
     const grouped = {
       strong: entries
